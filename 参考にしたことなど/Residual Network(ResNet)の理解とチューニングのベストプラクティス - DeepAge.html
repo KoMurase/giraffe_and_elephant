@@ -1,0 +1,703 @@
+
+<!-- saved from url=(0056)https://deepage.net/deep_learning/2016/11/30/resnet.html -->
+<html prefix="og: http://ogp.me/ns#" class="no-js" lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css" id="alertifyCSS">.alertify-logs>*{padding:12px 24px;color:#fff;box-shadow:0 2px 5px 0 rgba(0,0,0,.2);border-radius:1px}.alertify-logs>*,.alertify-logs>.default{background:rgba(0,0,0,.8)}.alertify-logs>.error{background:rgba(244,67,54,.8)}.alertify-logs>.success{background:rgba(76,175,80,.9)}.alertify{position:fixed;background-color:rgba(0,0,0,.3);left:0;right:0;top:0;bottom:0;width:100%;height:100%;z-index:2}.alertify.hide{opacity:0;pointer-events:none}.alertify,.alertify.show{box-sizing:border-box;transition:all .33s cubic-bezier(.25,.8,.25,1)}.alertify,.alertify *{box-sizing:border-box}.alertify .dialog{padding:12px}.alertify .alert,.alertify .dialog{width:100%;margin:0 auto;position:relative;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.alertify .alert>*,.alertify .dialog>*{width:400px;max-width:95%;margin:0 auto;text-align:center;padding:12px;background:#fff;box-shadow:0 2px 4px -1px rgba(0,0,0,.14),0 4px 5px 0 rgba(0,0,0,.098),0 1px 10px 0 rgba(0,0,0,.084)}.alertify .alert .msg,.alertify .dialog .msg{padding:12px;margin-bottom:12px;margin:0;text-align:left}.alertify .alert input:not(.form-control),.alertify .dialog input:not(.form-control){margin-bottom:15px;width:100%;font-size:100%;padding:12px}.alertify .alert input:not(.form-control):focus,.alertify .dialog input:not(.form-control):focus{outline-offset:-2px}.alertify .alert nav,.alertify .dialog nav{text-align:right}.alertify .alert nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button),.alertify .dialog nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button){background:transparent;box-sizing:border-box;color:rgba(0,0,0,.87);position:relative;outline:0;border:0;display:inline-block;-webkit-align-items:center;-ms-flex-align:center;-ms-grid-row-align:center;align-items:center;padding:0 6px;margin:6px 8px;line-height:36px;min-height:36px;white-space:nowrap;min-width:88px;text-align:center;text-transform:uppercase;font-size:14px;text-decoration:none;cursor:pointer;border:1px solid transparent;border-radius:2px}.alertify .alert nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button):active,.alertify .alert nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button):hover,.alertify .dialog nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button):active,.alertify .dialog nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button):hover{background-color:rgba(0,0,0,.05)}.alertify .alert nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button):focus,.alertify .dialog nav button:not(.btn):not(.pure-button):not(.md-button):not(.mdl-button):focus{border:1px solid rgba(0,0,0,.1)}.alertify .alert nav button.btn,.alertify .dialog nav button.btn{margin:6px 4px}.alertify-logs{position:fixed;z-index:1}.alertify-logs.bottom,.alertify-logs:not(.top){bottom:16px}.alertify-logs.left,.alertify-logs:not(.right){left:16px}.alertify-logs.left>*,.alertify-logs:not(.right)>*{float:left;-webkit-transform:translateZ(0);transform:translateZ(0);height:auto}.alertify-logs.left>.show,.alertify-logs:not(.right)>.show{left:0}.alertify-logs.left>*,.alertify-logs.left>.hide,.alertify-logs:not(.right)>*,.alertify-logs:not(.right)>.hide{left:-110%}.alertify-logs.right{right:16px}.alertify-logs.right>*{float:right;-webkit-transform:translateZ(0);transform:translateZ(0)}.alertify-logs.right>.show{right:0;opacity:1}.alertify-logs.right>*,.alertify-logs.right>.hide{right:-110%;opacity:0}.alertify-logs.top{top:0}.alertify-logs>*{box-sizing:border-box;transition:all .4s cubic-bezier(.25,.8,.25,1);position:relative;clear:both;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-perspective:1000;perspective:1000;max-height:0;margin:0;padding:0;overflow:hidden;opacity:0;pointer-events:none}.alertify-logs>.show{margin-top:12px;opacity:1;max-height:1000px;padding:12px;pointer-events:auto}</style>
+
+ 
+ <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+ 
+ <!-- Mobile Specific Metas -->
+ <meta name="HandheldFriendly" content="True">
+ <meta name="MobileOptimized" content="320">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+ <!-- CSS -->
+
+ <link rel="stylesheet" href="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/main.css">
+
+ <!-- Favicons -->
+ <link rel="icon" href="https://deepage.net/favicon.ico">
+
+ 
+  
+    <link rel="amphtml" href="https://deepage.net/amp/deep_learning/2016/11/30/resnet">
+  
+
+ 
+ <meta http-equiv="cleartype" content="on">
+
+<!-- TODO: Fix meta titles -->
+
+ 
+ 	<title>Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge</title>
+ 
+
+ 
+
+  
+
+  
+
+  
+
+
+
+
+ <!-- Begin Jekyll SEO tag v2.1.0 -->
+<meta property="og:title" content="Residual Network(ResNet)の理解とチューニングのベストプラクティス">
+<meta name="description" content="ImageNet2015で圧勝したResidual Network(ResNet)。層間で残差を足し合わせるというシンプルなアイデアでCNNは層を格段に深くして飛躍的に性能が向上した。">
+<meta property="og:description" content="ImageNet2015で圧勝したResidual Network(ResNet)。層間で残差を足し合わせるというシンプルなアイデアでCNNは層を格段に深くして飛躍的に性能が向上した。">
+<link rel="canonical" href="https://deepage.net/deep_learning/2016/11/30/resnet.html">
+<meta property="og:url" content="https://deepage.net/deep_learning/2016/11/30/resnet.html">
+<meta property="og:site_name" content="DeepAge">
+<meta property="og:image" content="https://deepage.net/img/resnet/resnet_top.jpg">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2016-11-30T19:06:35+09:00">
+<script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/inferredEvents.js.ダウンロード" async=""></script><script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/sdk.js.ダウンロード" async="" crossorigin="anonymous"></script><script async="" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/uh.js.ダウンロード"></script><script async="" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/analytics.js.ダウンロード"></script><script id="twitter-wjs" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/widgets.js.ダウンロード"></script><script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/1375343519170172" async=""></script><script id="facebook-jssdk" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/sdk.js(1).ダウンロード"></script><script async="" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/fbevents.js.ダウンロード"></script><script type="application/ld+json">
+{"@context": "http://schema.org",
+"@type": "BlogPosting",
+"headline": "Residual Network(ResNet)の理解とチューニングのベストプラクティス",
+"author": {"@type": "Organization",
+"name": "DeepAge"
+},
+"image": "https://deepage.net/img/resnet/resnet_top.jpg",
+"datePublished": "2016-11-30T19:06:35+09:00",
+"description": "ImageNet2015で圧勝したResidual Network(ResNet)。層間で残差を足し合わせるというシンプルなアイデアでCNNは層を格段に深くして飛躍的に性能が向上した。",
+"publisher": {"@type": "Organization",
+"name": "DeepAge",
+"logo": {"@type": "ImageObject",
+"url": "https://deepage.net/img/image_social_thumb.png"}},
+"url": "https://deepage.net/deep_learning/2016/11/30/resnet.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+ 
+ 
+ 
+ 
+ <meta name="twitter:card" content="summary_large_image">
+ <meta name="twitter:title" content="Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge">
+ <meta name="twitter:url" content="/deep_learning/2016/11/30/resnet.html">
+ <meta name="twitter:description" content="ImageNet2015で圧勝したResidual Network(ResNet)。層間で残差を足し合わせるというシンプルなアイデアでCNNは層を格段に深くして飛躍的に性能が向上した。">
+ <meta name="twitter:image:src" content="https://deepage.net/img/resnet/resnet_top.jpg">
+
+ <!-- Facebook Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1375343519170172'); // Insert your pixel ID here.
+fbq('track', 'PageView');</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=424751721225546&ev=PageView&noscript=1"
+/></noscript>
+<!-- DO NOT MODIFY -->
+<!-- End Facebook Pixel Code -->
+<script charset="utf-8" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/button.509719336ca39171c37a321231ccaf83.js.ダウンロード"></script><style type="text/css">.fb_hidden{position:absolute;top:-10000px;z-index:10001}.fb_reposition{overflow:hidden;position:relative}.fb_invisible{display:none}.fb_reset{background:none;border:0;border-spacing:0;color:#000;cursor:auto;direction:ltr;font-family:"lucida grande", tahoma, verdana, arial, "hiragino kaku gothic pro",meiryo,"ms pgothic",sans-serif;font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:1;margin:0;overflow:visible;padding:0;text-align:left;text-decoration:none;text-indent:0;text-shadow:none;text-transform:none;visibility:visible;white-space:normal;word-spacing:normal}.fb_reset>div{overflow:hidden}@keyframes fb_transform{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}.fb_animate{animation:fb_transform .3s forwards}
+.fb_dialog{background:rgba(82, 82, 82, .7);position:absolute;top:-10000px;z-index:10001}.fb_dialog_advanced{border-radius:8px;padding:10px}.fb_dialog_content{background:#fff;color:#373737}.fb_dialog_close_icon{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yq/r/IE9JII6Z1Ys.png) no-repeat scroll 0 0 transparent;cursor:pointer;display:block;height:15px;position:absolute;right:18px;top:17px;width:15px}.fb_dialog_mobile .fb_dialog_close_icon{left:5px;right:auto;top:5px}.fb_dialog_padding{background-color:transparent;position:absolute;width:1px;z-index:-1}.fb_dialog_close_icon:hover{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yq/r/IE9JII6Z1Ys.png) no-repeat scroll 0 -15px transparent}.fb_dialog_close_icon:active{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yq/r/IE9JII6Z1Ys.png) no-repeat scroll 0 -30px transparent}.fb_dialog_iframe{line-height:0}.fb_dialog_content .dialog_title{background:#6d84b4;border:1px solid #365899;color:#fff;font-size:14px;font-weight:bold;margin:0}.fb_dialog_content .dialog_title>span{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yd/r/Cou7n-nqK52.gif) no-repeat 5px 50%;float:left;padding:5px 0 7px 26px}body.fb_hidden{height:100%;left:0;margin:0;overflow:visible;position:absolute;top:-10000px;transform:none;width:100%}.fb_dialog.fb_dialog_mobile.loading{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/ya/r/3rhSv5V8j3o.gif) white no-repeat 50% 50%;min-height:100%;min-width:100%;overflow:hidden;position:absolute;top:0;z-index:10001}.fb_dialog.fb_dialog_mobile.loading.centered{background:none;height:auto;min-height:initial;min-width:initial;width:auto}.fb_dialog.fb_dialog_mobile.loading.centered #fb_dialog_loader_spinner{width:100%}.fb_dialog.fb_dialog_mobile.loading.centered .fb_dialog_content{background:none}.loading.centered #fb_dialog_loader_close{clear:both;color:#fff;display:block;font-size:18px;padding-top:20px}#fb-root #fb_dialog_ipad_overlay{background:rgba(0, 0, 0, .4);bottom:0;left:0;min-height:100%;position:absolute;right:0;top:0;width:100%;z-index:10000}#fb-root #fb_dialog_ipad_overlay.hidden{display:none}.fb_dialog.fb_dialog_mobile.loading iframe{visibility:hidden}.fb_dialog_mobile .fb_dialog_iframe{position:sticky;top:0}.fb_dialog_content .dialog_header{background:linear-gradient(from(#738aba), to(#2c4987));border-bottom:1px solid;border-color:#043b87;box-shadow:white 0 1px 1px -1px inset;color:#fff;font:bold 14px Helvetica, sans-serif;text-overflow:ellipsis;text-shadow:rgba(0, 30, 84, .296875) 0 -1px 0;vertical-align:middle;white-space:nowrap}.fb_dialog_content .dialog_header table{height:43px;width:100%}.fb_dialog_content .dialog_header td.header_left{font-size:12px;padding-left:5px;vertical-align:middle;width:60px}.fb_dialog_content .dialog_header td.header_right{font-size:12px;padding-right:5px;vertical-align:middle;width:60px}.fb_dialog_content .touchable_button{background:linear-gradient(from(#4267B2), to(#2a4887));background-clip:padding-box;border:1px solid #29487d;border-radius:3px;display:inline-block;line-height:18px;margin-top:3px;max-width:85px;padding:4px 12px;position:relative}.fb_dialog_content .dialog_header .touchable_button input{background:none;border:none;color:#fff;font:bold 12px Helvetica, sans-serif;margin:2px -12px;padding:2px 6px 3px 6px;text-shadow:rgba(0, 30, 84, .296875) 0 -1px 0}.fb_dialog_content .dialog_header .header_center{color:#fff;font-size:16px;font-weight:bold;line-height:18px;text-align:center;vertical-align:middle}.fb_dialog_content .dialog_content{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/y9/r/jKEcVPZFk-2.gif) no-repeat 50% 50%;border:1px solid #4a4a4a;border-bottom:0;border-top:0;height:150px}.fb_dialog_content .dialog_footer{background:#f5f6f7;border:1px solid #4a4a4a;border-top-color:#ccc;height:40px}#fb_dialog_loader_close{float:left}.fb_dialog.fb_dialog_mobile .fb_dialog_close_button{text-shadow:rgba(0, 30, 84, .296875) 0 -1px 0}.fb_dialog.fb_dialog_mobile .fb_dialog_close_icon{visibility:hidden}#fb_dialog_loader_spinner{animation:rotateSpinner 1.2s linear infinite;background-color:transparent;background-image:url(https://static.xx.fbcdn.net/rsrc.php/v3/yD/r/t-wz8gw1xG1.png);background-position:50% 50%;background-repeat:no-repeat;height:24px;width:24px}@keyframes rotateSpinner{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.fb_iframe_widget{display:inline-block;position:relative}.fb_iframe_widget span{display:inline-block;position:relative;text-align:justify}.fb_iframe_widget iframe{position:absolute}.fb_iframe_widget_fluid_desktop,.fb_iframe_widget_fluid_desktop span,.fb_iframe_widget_fluid_desktop iframe{max-width:100%}.fb_iframe_widget_fluid_desktop iframe{min-width:220px;position:relative}.fb_iframe_widget_lift{z-index:1}.fb_iframe_widget_fluid{display:inline}.fb_iframe_widget_fluid span{width:100%}</style></head>
+
+  <body class="bg_grey">
+
+  	<div id="fb-root" class=" fb_reset"><div style="position: absolute; top: -10000px; width: 0px; height: 0px;"><div><iframe name="fb_xdm_frame_https" id="fb_xdm_frame_https" aria-hidden="true" title="Facebook Cross Domain Communication Frame" tabindex="-1" frameborder="0" allowtransparency="true" allowfullscreen="true" scrolling="no" allow="encrypted-media" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/xd_arbiter.html" style="border: none;"></iframe></div><div></div></div></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.6&appId=637871436291439";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+  <div class="header-move-wrapper header-close">
+    <header id="blog_header">
+	<div class="blog-logo">
+		<a href="https://deepage.net/blog/"><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/logo.png" alt="DeepAge" class="logo"><small>人工知能の今と一歩先を発信するメディア</small></a>
+	</div>
+	
+	
+	
+	
+
+	
+	<!-- <a href="/recruit_regular.html" class="recruit-menu menu-margin-top large-only" onClick="ga('send', 'event', 'link', 'click', 'recruit-regular-from-header-link-pc', 1, {'nonInteraction' : 1});">採用情報</a> -->
+	<!-- <a href="/recruit_part.html" class="recruit-menu menu-margin-top large-only" onClick="ga('send', 'event', 'link', 'click', 'recruit-part-from-header-link-pc', 1, {'nonInteraction' : 1});">アルバイト募集</a> -->
+	
+
+	<!-- <a href="/recruit.html" class="recruit-menu-ghost">学生インターン募集 ＞</a> -->
+
+	<a class="btn-menu">
+		<span class="menu-trigger" href="#">
+			<span></span>
+			<span></span>
+			<span></span>
+		</span>
+		<small>MENU</small>
+	</a>
+</header>
+
+    <nav id="navigation">
+	<ul>
+	
+	
+		<li><a href="https://deepage.net/blog/">すべて</a></li>
+  	
+
+		<li><a href="https://deepage.net/features/numpy/">Numpy</a></li>
+  	
+  	
+
+  	
+		<li><a href="https://deepage.net/categories/bigdata">
+			ビッグデータ</a>
+    
+  	
+
+  	
+		</li><li><a href="https://deepage.net/categories/machine_learning">
+			機械学習</a>
+    
+  	
+
+  	
+		</li><li><a href="https://deepage.net/categories/ai_watson">
+			人工知能</a>
+    
+  	
+
+  	
+		</li><li><a href="https://deepage.net/categories/deep_learning">
+			ディープラーニング</a>
+    
+  	
+
+  	
+
+    
+  	
+
+  	
+		</li><li><a href="https://deepage.net/categories/tensorflow">
+			TensorFlow</a>
+    
+  	
+
+	</li></ul>
+
+</nav>
+
+  </div>
+    
+<div class="header-space"></div>
+<div class="breadcrumb-wrapper">
+
+	<p><small><a href="https://deepage.net/blog/">ホーム</a> &gt; 
+		<a href="https://deepage.net/categories/deep_learning">ディープラーニング</a> &gt; Residual Network(ResNet)の理解とチューニングのベストプラクティス
+		</small></p>
+
+</div>
+<div class="row">
+	
+	
+
+	
+	<a href="https://deepage.net/recruit_regular.html" class="recruit-menu menu-margin-top small-only" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;link&#39;, &#39;click&#39;, &#39;recruit-regular-from-header-link-sp&#39;, 1, {&#39;nonInteraction&#39; : 1});">採用情報</a>
+	<a href="https://deepage.net/recruit_part.html" class="recruit-menu menu-margin-top small-only" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;link&#39;, &#39;click&#39;, &#39;recruit-part-from-header-link-sp&#39;, 1, {&#39;nonInteraction&#39; : 1});">アルバイト募集</a>
+	
+	
+</div>
+
+
+    <div id="post-wrapper" class="bg-white">
+<article id="post" class="content-wrapper-post article-blog" itemscope="" itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+
+  <p class="post-meta"><small><time datetime="2016-11-30T19:06:35+09:00" itemprop="datePublished">2016-11-30</time></small></p>
+
+
+  <h1 class="post-title" itemprop="name headline">Residual Network(ResNet)の理解とチューニングのベストプラクティス</h1>
+  <p></p>
+
+  <div class="social-buttons">
+    <!-- twitter -->
+<span class="twitter-social-share social-event-button" buttonid="3">
+	<iframe id="twitter-widget-1" scrolling="no" frameborder="0" allowtransparency="true" class="twitter-share-button twitter-share-button-rendered twitter-tweet-button" style="position: static; visibility: visible; width: 75px; height: 20px;" title="Twitter Tweet Button" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/tweet_button.097c1f5038f9e8a0d62a39a892838d66.ja.html" data-url="https://deepage.net/deep_learning/2016/11/30/resnet.html"></iframe>
+</span>
+
+<!-- fb -->
+<span class="facebook-social-share social-event-button" buttonid="4">
+	<span class="fb-like fb_iframe_widget" data-href="https://deepage.net/deep_learning/2016/11/30/resnet.html" data-layout="button" data-action="like" data-show-faces="false" data-share="true" fb-xfbml-state="rendered" fb-iframe-plugin-query="action=like&amp;app_id=637871436291439&amp;container_width=0&amp;href=https%3A%2F%2Fdeepage.net%2Fdeep_learning%2F2016%2F11%2F30%2Fresnet.html&amp;layout=button&amp;locale=ja_JP&amp;sdk=joey&amp;share=true&amp;show_faces=false"><span style="vertical-align: bottom; width: 120px; height: 20px;"><iframe name="f1def74a1028fb8" width="1000px" height="1000px" title="fb:like Facebook Social Plugin" frameborder="0" allowtransparency="true" allowfullscreen="true" scrolling="no" allow="encrypted-media" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/like.html" style="border: none; visibility: visible; width: 120px; height: 20px;" class=""></iframe></span></span>
+</span>
+
+<!-- hatebu -->
+<span class="hatebu-social-share social-event-button" buttonid="5">
+<iframe class="hatena-bookmark-button-frame" title="このエントリーをはてなブックマークに追加" frameborder="0" scrolling="no" width="86" height="20" src="javascript:false" style="width: 86px; height: 20px;" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/saved_resource.html"></iframe><script type="text/javascript" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/bookmark_button.js.ダウンロード" charset="utf-8" async="async"></script>
+</span>
+
+<!-- Pocket -->
+<span class="pocket-social-share social-event-button" buttonid="6">
+<div class="pocket-btn"><iframe width="66" height="22" id="pocket-button-0" frameborder="0" allowtransparency="true" scrolling="NO" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/button.html"></iframe></div>
+</span>
+
+  </div>
+
+  <img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/resnet_top.jpg" alt="サムネイル画像" id="thumbnail-image">
+
+</header>
+
+
+  <div class="post-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h2"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#residual-networkresnet%E3%81%A8%E3%81%AF">Residual Network（ResNet）とは</a></li>
+<li class="toc-entry toc-h3"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#resnet%E3%81%AE%E3%82%A2%E3%82%A4%E3%83%87%E3%82%A2">ResNetのアイデア</a></li>
+<li class="toc-entry toc-h3"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#shortcut-connection%E3%81%AE%E5%B0%8E%E5%85%A5">Shortcut Connectionの導入</a></li>
+<li class="toc-entry toc-h3"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#bottleneck%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3">Bottleneckアーキテクチャ</a></li>
+<li class="toc-entry toc-h2"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#resnet%E3%81%AE%E6%9C%80%E9%81%A9%E5%8C%96%E3%83%99%E3%82%B9%E3%83%88%E3%83%97%E3%83%A9%E3%82%AF%E3%83%86%E3%82%A3%E3%82%B9">ResNetの最適化ベストプラクティス</a></li>
+<li class="toc-entry toc-h3"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#optimizer%E3%81%AE%E9%81%B8%E5%AE%9A">Optimizerの選定</a></li>
+<li class="toc-entry toc-h3"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#batch-normalization%E3%81%AE%E4%BD%8D%E7%BD%AE">Batch Normalizationの位置</a></li>
+<li class="toc-entry toc-h3"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#post-activation-vs-pre-activation">Post Activation vs Pre Activation</a></li>
+<li class="toc-entry toc-h3"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#wide-residual-network">Wide Residual Network</a></li>
+<li class="toc-entry toc-h2"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#%E3%81%BE%E3%81%A8%E3%82%81">まとめ</a></li>
+<li class="toc-entry toc-h2"><a href="https://deepage.net/deep_learning/2016/11/30/resnet.html#%E5%8F%82%E8%80%83">参考</a></li>
+</ul><p>2015年のImageNetコンペティションとCOCOセグメンテーションの最良モデルとしてDeep Residual NetworksがMicrosoft Researchから提案され、最大1000層以上の深いニューラルネットワークを構築することが可能となった。</p>
+
+<p>本記事では、</p>
+
+<ul>
+  <li>Residual Networkとは何か</li>
+  <li>Residual Networkのチューニング方法</li>
+  <li>Residual Networkの派生モデル</li>
+</ul>
+
+<p>をまとめた。</p>
+
+<h2 id="residual-networkresnetとは">
+<a id="residual-networkresnetとは" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#residual-networkresnet%E3%81%A8%E3%81%AF" aria-hidden="true"><span class="octicon octicon-link"></span></a>Residual Network（ResNet）とは</h2>
+
+<p>ResNetは、Microsoft Research(現Facebook AI Research)のKaiming He氏が2015年に考案したニューラルネットワークのモデルである。</p>
+
+<p><a href="https://deepage.net/deep_learning/2016/11/07/convolutional_neural_network.html">CNN</a>において層を深くすることは重要な役割を果たす。層を重ねるごとに、より高度で複雑な特徴を抽出していると考えられているからだ。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/conv.jpg" alt="convolutional neural network"></p>
+
+<p>Convolution層はフィルタを持ち、Pooling層と組み合わせて何らかの特徴を検出する役割を持っている。低・中・高レベルの特徴を多層形式で自然に統合し、認識レベルを強化することができる。</p>
+
+<p>2014年の画像認識の分野でトップを争うImageNetコンペティションにおいて、1位と2位を飾ったモデルはVGGNetと呼ばれている。</p>
+
+<blockquote>
+  <p><a href="https://arxiv.org/abs/1409.1556">Very Deep Convolutional Networks for Large-Scale Image Recognition</a></p>
+</blockquote>
+
+<p>こちらがその論文である。層の数を16層や19層まで深くしたのだ。それで<strong>Very Deep</strong>と名付けられていた。</p>
+
+<p>検出部門で勝利を飾ったGoogLeNetでも22層だった。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/layers_of_ilsvrc.jpg" alt="ILSVRCの最大層数"></p>
+
+<p>こちらが2010年から始まったImageNetコンペティション部門1位となったモデルの最大総数である。2015年においてはResNetで<strong>152層</strong>まで深くすることが出来た。<strong>Very Deep</strong>の16、19層やGoogLeNetの22層がものすごく浅く感じてしまう。</p>
+
+<h3 id="resnetのアイデア">
+<a id="resnetのアイデア" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#resnet%E3%81%AE%E3%82%A2%E3%82%A4%E3%83%87%E3%82%A2" aria-hidden="true"><span class="octicon octicon-link"></span></a>ResNetのアイデア</h3>
+
+<p>ResNet以前も層を更に深くする試みはあったものの、思い通りに学習が進まなかった。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/not_easy_deep.jpg" alt="深さの失敗"></p>
+
+<p>単純に層を深くすると、性能が悪化することが報告されていた。</p>
+
+<p>では、ResNetはどのようにしてニューラルネットワークのモデルを深くすることを可能にしたのだろうか？</p>
+
+<p>ResNetのアイデアはシンプルで、「<strong>ある層で求める最適な出力を学習するのではなく、層の入力を参照した残差関数を学習する</strong>」 ことで最適化しやすくしている。</p>
+
+<p>つまり、<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="5.203ex" height="2.634ex" style="vertical-align: -0.755ex;" viewBox="0 -809.3 2240 1134.2" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title"><title id="MathJax-SVG-1-Title">H(x)</title>
+<defs aria-hidden="true"><path stroke-width="1" id="E1-MJMATHI-48" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 219 683Q260 681 355 681Q389 681 418 681T463 682T483 682Q499 682 499 672Q499 670 497 658Q492 641 487 638H485Q483 638 480 638T473 638T464 637T455 637Q416 636 405 634T387 623Q384 619 355 500Q348 474 340 442T328 395L324 380Q324 378 469 378H614L615 381Q615 384 646 504Q674 619 674 627T617 637Q594 637 587 639T580 648Q580 650 582 660Q586 677 588 679T604 682Q609 682 646 681T740 680Q802 680 835 681T871 682Q888 682 888 672Q888 645 876 638H874Q872 638 869 638T862 638T853 637T844 637Q805 636 794 634T776 623Q773 618 704 340T634 58Q634 51 638 51Q646 48 692 46H723Q729 38 729 37T726 19Q722 6 716 0H701Q664 2 567 2Q533 2 504 2T458 2T437 1Q420 1 420 10Q420 15 423 24Q428 43 433 45Q437 46 448 46H454Q481 46 514 49Q520 50 522 50T528 55T534 64T540 82T547 110T558 153Q565 181 569 198Q602 330 602 331T457 332H312L279 197Q245 63 245 58Q245 51 253 49T303 46H334Q340 38 340 37T337 19Q333 6 327 0H312Q275 2 178 2Q144 2 115 2T69 2T48 1Q31 1 31 10Q31 12 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path><path stroke-width="1" id="E1-MJMAIN-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path stroke-width="1" id="E1-MJMATHI-78" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path><path stroke-width="1" id="E1-MJMAIN-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true"> <use xlink:href="#E1-MJMATHI-48" x="0" y="0"></use> <use xlink:href="#E1-MJMAIN-28" x="888" y="0"></use> <use xlink:href="#E1-MJMATHI-78" x="1278" y="0"></use> <use xlink:href="#E1-MJMAIN-29" x="1850" y="0"></use></g></svg> が学習して欲しい関数だとすると、入力との差分は<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="17.998ex" height="2.634ex" style="vertical-align: -0.755ex;" viewBox="0 -809.3 7749 1134.2" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title"><title id="MathJax-SVG-1-Title">F(x) := H(x) - x</title>
+<defs aria-hidden="true"><path stroke-width="1" id="E1-MJMATHI-46" d="M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z"></path><path stroke-width="1" id="E1-MJMAIN-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path stroke-width="1" id="E1-MJMATHI-78" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path><path stroke-width="1" id="E1-MJMAIN-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path stroke-width="1" id="E1-MJMAIN-3A" d="M78 370Q78 394 95 412T138 430Q162 430 180 414T199 371Q199 346 182 328T139 310T96 327T78 370ZM78 60Q78 84 95 102T138 120Q162 120 180 104T199 61Q199 36 182 18T139 0T96 17T78 60Z"></path><path stroke-width="1" id="E1-MJMAIN-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path stroke-width="1" id="E1-MJMATHI-48" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 219 683Q260 681 355 681Q389 681 418 681T463 682T483 682Q499 682 499 672Q499 670 497 658Q492 641 487 638H485Q483 638 480 638T473 638T464 637T455 637Q416 636 405 634T387 623Q384 619 355 500Q348 474 340 442T328 395L324 380Q324 378 469 378H614L615 381Q615 384 646 504Q674 619 674 627T617 637Q594 637 587 639T580 648Q580 650 582 660Q586 677 588 679T604 682Q609 682 646 681T740 680Q802 680 835 681T871 682Q888 682 888 672Q888 645 876 638H874Q872 638 869 638T862 638T853 637T844 637Q805 636 794 634T776 623Q773 618 704 340T634 58Q634 51 638 51Q646 48 692 46H723Q729 38 729 37T726 19Q722 6 716 0H701Q664 2 567 2Q533 2 504 2T458 2T437 1Q420 1 420 10Q420 15 423 24Q428 43 433 45Q437 46 448 46H454Q481 46 514 49Q520 50 522 50T528 55T534 64T540 82T547 110T558 153Q565 181 569 198Q602 330 602 331T457 332H312L279 197Q245 63 245 58Q245 51 253 49T303 46H334Q340 38 340 37T337 19Q333 6 327 0H312Q275 2 178 2Q144 2 115 2T69 2T48 1Q31 1 31 10Q31 12 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path><path stroke-width="1" id="E1-MJMAIN-2212" d="M84 237T84 250T98 270H679Q694 262 694 250T679 230H98Q84 237 84 250Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true"> <use xlink:href="#E1-MJMATHI-46" x="0" y="0"></use> <use xlink:href="#E1-MJMAIN-28" x="749" y="0"></use> <use xlink:href="#E1-MJMATHI-78" x="1139" y="0"></use> <use xlink:href="#E1-MJMAIN-29" x="1711" y="0"></use><g transform="translate(2378,0)"> <use xlink:href="#E1-MJMAIN-3A"></use> <use xlink:href="#E1-MJMAIN-3D" x="278" y="0"></use></g> <use xlink:href="#E1-MJMATHI-48" x="3713" y="0"></use> <use xlink:href="#E1-MJMAIN-28" x="4602" y="0"></use> <use xlink:href="#E1-MJMATHI-78" x="4991" y="0"></use> <use xlink:href="#E1-MJMAIN-29" x="5564" y="0"></use> <use xlink:href="#E1-MJMAIN-2212" x="6175" y="0"></use> <use xlink:href="#E1-MJMATHI-78" x="7176" y="0"></use></g></svg> となり、<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="17.998ex" height="2.634ex" style="vertical-align: -0.755ex;" viewBox="0 -809.3 7749 1134.2" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title"><title id="MathJax-SVG-1-Title">H(x) := F(x) + x</title>
+<defs aria-hidden="true"><path stroke-width="1" id="E1-MJMATHI-48" d="M228 637Q194 637 192 641Q191 643 191 649Q191 673 202 682Q204 683 219 683Q260 681 355 681Q389 681 418 681T463 682T483 682Q499 682 499 672Q499 670 497 658Q492 641 487 638H485Q483 638 480 638T473 638T464 637T455 637Q416 636 405 634T387 623Q384 619 355 500Q348 474 340 442T328 395L324 380Q324 378 469 378H614L615 381Q615 384 646 504Q674 619 674 627T617 637Q594 637 587 639T580 648Q580 650 582 660Q586 677 588 679T604 682Q609 682 646 681T740 680Q802 680 835 681T871 682Q888 682 888 672Q888 645 876 638H874Q872 638 869 638T862 638T853 637T844 637Q805 636 794 634T776 623Q773 618 704 340T634 58Q634 51 638 51Q646 48 692 46H723Q729 38 729 37T726 19Q722 6 716 0H701Q664 2 567 2Q533 2 504 2T458 2T437 1Q420 1 420 10Q420 15 423 24Q428 43 433 45Q437 46 448 46H454Q481 46 514 49Q520 50 522 50T528 55T534 64T540 82T547 110T558 153Q565 181 569 198Q602 330 602 331T457 332H312L279 197Q245 63 245 58Q245 51 253 49T303 46H334Q340 38 340 37T337 19Q333 6 327 0H312Q275 2 178 2Q144 2 115 2T69 2T48 1Q31 1 31 10Q31 12 34 24Q39 43 44 45Q48 46 59 46H65Q92 46 125 49Q139 52 144 61Q147 65 216 339T285 628Q285 635 228 637Z"></path><path stroke-width="1" id="E1-MJMAIN-28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path><path stroke-width="1" id="E1-MJMATHI-78" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path><path stroke-width="1" id="E1-MJMAIN-29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path><path stroke-width="1" id="E1-MJMAIN-3A" d="M78 370Q78 394 95 412T138 430Q162 430 180 414T199 371Q199 346 182 328T139 310T96 327T78 370ZM78 60Q78 84 95 102T138 120Q162 120 180 104T199 61Q199 36 182 18T139 0T96 17T78 60Z"></path><path stroke-width="1" id="E1-MJMAIN-3D" d="M56 347Q56 360 70 367H707Q722 359 722 347Q722 336 708 328L390 327H72Q56 332 56 347ZM56 153Q56 168 72 173H708Q722 163 722 153Q722 140 707 133H70Q56 140 56 153Z"></path><path stroke-width="1" id="E1-MJMATHI-46" d="M48 1Q31 1 31 11Q31 13 34 25Q38 41 42 43T65 46Q92 46 125 49Q139 52 144 61Q146 66 215 342T285 622Q285 629 281 629Q273 632 228 634H197Q191 640 191 642T193 659Q197 676 203 680H742Q749 676 749 669Q749 664 736 557T722 447Q720 440 702 440H690Q683 445 683 453Q683 454 686 477T689 530Q689 560 682 579T663 610T626 626T575 633T503 634H480Q398 633 393 631Q388 629 386 623Q385 622 352 492L320 363H375Q378 363 398 363T426 364T448 367T472 374T489 386Q502 398 511 419T524 457T529 475Q532 480 548 480H560Q567 475 567 470Q567 467 536 339T502 207Q500 200 482 200H470Q463 206 463 212Q463 215 468 234T473 274Q473 303 453 310T364 317H309L277 190Q245 66 245 60Q245 46 334 46H359Q365 40 365 39T363 19Q359 6 353 0H336Q295 2 185 2Q120 2 86 2T48 1Z"></path><path stroke-width="1" id="E1-MJMAIN-2B" d="M56 237T56 250T70 270H369V420L370 570Q380 583 389 583Q402 583 409 568V270H707Q722 262 722 250T707 230H409V-68Q401 -82 391 -82H389H387Q375 -82 369 -68V230H70Q56 237 56 250Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true"> <use xlink:href="#E1-MJMATHI-48" x="0" y="0"></use> <use xlink:href="#E1-MJMAIN-28" x="888" y="0"></use> <use xlink:href="#E1-MJMATHI-78" x="1278" y="0"></use> <use xlink:href="#E1-MJMAIN-29" x="1850" y="0"></use><g transform="translate(2517,0)"> <use xlink:href="#E1-MJMAIN-3A"></use> <use xlink:href="#E1-MJMAIN-3D" x="278" y="0"></use></g> <use xlink:href="#E1-MJMATHI-46" x="3852" y="0"></use> <use xlink:href="#E1-MJMAIN-28" x="4602" y="0"></use> <use xlink:href="#E1-MJMATHI-78" x="4991" y="0"></use> <use xlink:href="#E1-MJMAIN-29" x="5564" y="0"></use> <use xlink:href="#E1-MJMAIN-2B" x="6175" y="0"></use> <use xlink:href="#E1-MJMATHI-78" x="7176" y="0"></use></g></svg> を学習するように再定義する。</p>
+
+<h3 id="shortcut-connectionの導入">
+<a id="shortcut-connectionの導入" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#shortcut-connection%E3%81%AE%E5%B0%8E%E5%85%A5" aria-hidden="true"><span class="octicon octicon-link"></span></a>Shortcut Connectionの導入</h3>
+
+<p>では、どのように実現したらいいのだろう？</p>
+
+<p>ResNetでは、<strong>残差ブロック</strong>と<strong>Shortcut Connection</strong>を導入することで実現している。一般的なネットワークが以下のような図だとしたら、</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/plain_network.jpg" alt="Plain Network"></p>
+
+<p>残差ブロックはこうなる。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/residual_block.jpg" alt="Residual Block"></p>
+
+<p>残差ブロックでは、畳込み層とSkip Connectionの組み合わせになっている。2つの枝から構成されていて、それぞれの要素を足し合わせる。残差ブロックの一つはConvolution層の組み合わせで、もう一つはIdentity関数となる。</p>
+
+<p>こうすれば、仮に追加の層で変換が不要でもweightを0にすれば良い。</p>
+
+<p>残差ブロックを導入することで、結果的に層の深度の限界を押し上げることができ、精度向上を果たすことが出来た。</p>
+
+<h3 id="bottleneckアーキテクチャ">
+<a id="bottleneckアーキテクチャ" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#bottleneck%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bottleneckアーキテクチャ</h3>
+
+<p>Residual Blockには2つのアーキテクチャがある。</p>
+
+<ul>
+  <li>Plainアーキテクチャ</li>
+  <li>Bottleneckアーキテクチャ</li>
+</ul>
+
+<p>で、こちらがPlainアーキテクチャとなっている。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/plain_architecture.jpg" alt="Plain Archtecture"></p>
+
+<p>3×3のConvolution層が2つある。そして、こちらがBottleneckアーキテクチャで残差ブロックの中が少しだけ変わっている。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/bottleneck_architecture.jpg" alt="Bottleneck Architecture"></p>
+
+<p>この2つは同等の計算コストとなるが、Bottleneckアーキテクチャの方はPlainよりも1層多くなる。1×1と3×3のConvolution層で出力のDepthの次元を小さくしてから最後の1×1のConvolution層でDepthの次元を復元することから<strong>Bottleneck</strong>という名前がついている。</p>
+
+<h2 id="resnetの最適化ベストプラクティス">
+<a id="resnetの最適化ベストプラクティス" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#resnet%E3%81%AE%E6%9C%80%E9%81%A9%E5%8C%96%E3%83%99%E3%82%B9%E3%83%88%E3%83%97%E3%83%A9%E3%82%AF%E3%83%86%E3%82%A3%E3%82%B9" aria-hidden="true"><span class="octicon octicon-link"></span></a>ResNetの最適化ベストプラクティス</h2>
+
+<p>それでは、実際の実装におけるパラメータのチューニングポイントを紹介する。FacebookのTorchのブログにある<a href="http://torch.ch/blog/2016/02/04/resnets.html">Training and investigating Residual Nets</a>と、ResNetの派生モデルの提案</p>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/1603.05027">Identity Mappings in Deep Residual Networks</a></li>
+  <li><a href="https://arxiv.org/abs/1605.07146">Wide Residual Networks</a></li>
+</ul>
+
+<p>を参考にしている。</p>
+
+<h3 id="optimizerの選定">
+<a id="optimizerの選定" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#optimizer%E3%81%AE%E9%81%B8%E5%AE%9A" aria-hidden="true"><span class="octicon octicon-link"></span></a>Optimizerの選定</h3>
+
+<p>原論文には、SGD+Momentumを使うと書かれていたがTorchのブログでもこれが最良の結果となったようだ。</p>
+
+<ul>
+  <li>RMSprop</li>
+  <li>Adadelta</li>
+  <li>Adagrad</li>
+  <li>SGD+Momentum</li>
+</ul>
+
+<p>で調査したところ、唯一<strong>SGD+Momentumだけが0.7%を下回る</strong>テストエラーとなったそう。</p>
+
+<h3 id="batch-normalizationの位置">
+<a id="batch-normalizationの位置" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#batch-normalization%E3%81%AE%E4%BD%8D%E7%BD%AE" aria-hidden="true"><span class="octicon octicon-link"></span></a>Batch Normalizationの位置</h3>
+
+<p>Batch Normalizationを足し合わせる前に入れるか、足し合わせた後に入れるかをTorchのブログで検証している。</p>
+
+<p>Batch Normalizationについてはこちら：</p>
+
+<blockquote>
+  <p><a href="https://deepage.net/deep_learning/2016/10/26/batch_normalization.html">Batch Normalization：ニューラルネットワークの学習を加速させる汎用的で強力な手法</a></p>
+</blockquote>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/bn_pos.jpg" alt="Batch Normalizationの位置"></p>
+
+<p>元は左のBatch Normalizationを足し合わせる前に入れるタイプだが、右側の後に入れるタイプにするとどうなるだろうか？</p>
+
+<p>この検証結果は、Batch Normalizationを後に入れた場合、著しくテストデータにおける性能が落ちた。理由は、最後にBatch Normalizationをすれば残差ブロック全てが正規化されて良いように見えるが、実際にはSkip Connectionの情報をBatch Normalizationが大きく変更して情報の伝達を妨げてしまうからだそうだ。</p>
+
+<h3 id="post-activation-vs-pre-activation">
+<a id="post-activation-vs-pre-activation" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#post-activation-vs-pre-activation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Post Activation vs Pre Activation</h3>
+
+<p>次は、<a href="https://arxiv.org/abs/1603.05027">Identity Mappings in Deep Residual Networks</a>においての検証で下図のように元の構成が左のようになっていた場合、Activation関数とBatch Normalizationの位置を前方に持ってくるとどうなるだろうか？</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/post_vs_pre.jpg" alt="Pre vs Post Activation"></p>
+
+<p>この実験では、層の数が増えれば増えるほど顕著にActivation関数とBatch Normalizationを前に持ってきた後者のほうが良い結果となったそうだ。</p>
+
+<p>画像認識の分類タスクImageNetにおいて、200層のResNetを使った実験ではエラーレート<strong>1.1%の改善</strong>をしている。</p>
+
+<p>さらにメリットとして、Pre Activationの場合Batch Normalizationを前方に持ってくることで正則化の役割が強くなったという結果が報告されている。</p>
+
+<h3 id="wide-residual-network">
+<a id="wide-residual-network" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#wide-residual-network" aria-hidden="true"><span class="octicon octicon-link"></span></a>Wide Residual Network</h3>
+
+<p>最後はWide Residual Networkで、こちらはBatch NormalizationやActivation関数の順序ではなく、フィルタの数を増やしてネットワークを”<strong>広く</strong>“したらどうなるのか？</p>
+
+<p>ということを検証したものだ。以下の表を見て欲しい。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/wide_param.jpg" alt="Wide Params"></p>
+
+<svg width="2.064ex" height="2.009ex" style="vertical-align: -0.255ex;" viewBox="0 -755.5 888.5 865.1" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title" xmlns:xlink="http://www.w3.org/1999/xlink"><title id="MathJax-SVG-1-Title">N</title>
+<defs aria-hidden="true"><path stroke-width="1" id="E1-MJMATHI-4E" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true"> <use xlink:href="#E1-MJMATHI-4E" x="0" y="0"></use></g></svg>
+<p>が残差ブロックの数となっていて、<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1.211ex" height="2.009ex" style="vertical-align: -0.255ex;" viewBox="0 -755.5 521.5 865.1" role="img" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title"><title id="MathJax-SVG-1-Title">k</title>
+<defs aria-hidden="true"><path stroke-width="1" id="E1-MJMATHI-6B" d="M121 647Q121 657 125 670T137 683Q138 683 209 688T282 694Q294 694 294 686Q294 679 244 477Q194 279 194 272Q213 282 223 291Q247 309 292 354T362 415Q402 442 438 442Q468 442 485 423T503 369Q503 344 496 327T477 302T456 291T438 288Q418 288 406 299T394 328Q394 353 410 369T442 390L458 393Q446 405 434 405H430Q398 402 367 380T294 316T228 255Q230 254 243 252T267 246T293 238T320 224T342 206T359 180T365 147Q365 130 360 106T354 66Q354 26 381 26Q429 26 459 145Q461 153 479 153H483Q499 153 499 144Q499 139 496 130Q455 -11 378 -11Q333 -11 305 15T277 90Q277 108 280 121T283 145Q283 167 269 183T234 206T200 217T182 220H180Q168 178 159 139T145 81T136 44T129 20T122 7T111 -2Q98 -11 83 -11Q66 -11 57 -1T48 16Q48 26 85 176T158 471L195 616Q196 629 188 632T149 637H144Q134 637 131 637T124 640T121 647Z"></path></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true"> <use xlink:href="#E1-MJMATHI-6B" x="0" y="0"></use></g></svg>が”広さ”係数だ。[]の中のパラメータは、フィルタサイズ,フィルタの数で広いネットワークでは、フィルタの数が大幅に増えることになる。</p>
+
+<p>こうすることで、広さの係数を10倍にすると1000層の”薄い”ResNetと同等のパラメータ数を持つこととなり、さらにGPUによる処理をフルに活かすことができるようになる。</p>
+
+<p>そして実験結果では、”薄い”ResNetよりも高い精度を<strong>50分の1の層数で、半分の時間の訓練時間</strong>になったそうだ。</p>
+
+<p>そしてさらに、Convolution層の間にDropoutを入れることで更なる性能向上を果たすことができたということが報告されている。</p>
+
+<p>Dropoutについてはこちら：</p>
+
+<blockquote>
+  <p><a href="https://deepage.net/deep_learning/2016/10/17/deeplearning_dropout.html">Dropout：ディープラーニングの火付け役、単純な方法で過学習を防ぐ</a></p>
+</blockquote>
+
+<p>以下の図のように、最後のConvolution層の手前にDropoutを入れる。</p>
+
+<p><img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/wide_resnet.jpg" alt="Wide Residual Networks"></p>
+
+<p>広さの係数10で28層のWide ResNetにDropout率30~40%程度適用すると高い精度となったそうだ。</p>
+
+<h2 id="まとめ">
+<a id="まとめ" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#%E3%81%BE%E3%81%A8%E3%82%81" aria-hidden="true"><span class="octicon octicon-link"></span></a>まとめ</h2>
+
+<p>ResNetでVery Deepよりもさらに深い層を学習することが可能になった。そして、パラメータのチューニングやライブラリを使った実装のお役に立てるよう派生モデルのResNetを紹介した。</p>
+
+<p>ResNetの実装や方針の参考にして欲しい。</p>
+
+<h2 id="参考">
+<a id="参考" class="anchor" href="https://deepage.net/deep_learning/2016/11/30/resnet.html#%E5%8F%82%E8%80%83" aria-hidden="true"><span class="octicon octicon-link"></span></a>参考</h2>
+
+<ul>
+  <li><a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a></li>
+  <li><a href="http://torch.ch/blog/2016/02/04/resnets.html">Training and investigating Residual Nets</a></li>
+  <li><a href="https://arxiv.org/abs/1603.05027">Identity Mappings in Deep Residual Networks</a></li>
+  <li><a href="https://arxiv.org/abs/1605.07146">Wide Residual Networks</a></li>
+</ul>
+
+  </div>
+
+  <div class="tags-bottom">
+  <div class="row">
+  
+ </div>
+  </div>
+
+  <div class="social-buttons-bottom">
+	<!-- twitter -->
+<span class="twitter-social-share social-event-button" buttonid="3">
+	<iframe id="twitter-widget-2" scrolling="no" frameborder="0" allowtransparency="true" class="twitter-share-button twitter-share-button-rendered twitter-tweet-button" style="position: static; visibility: visible; width: 75px; height: 20px;" title="Twitter Tweet Button" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/tweet_button.097c1f5038f9e8a0d62a39a892838d66.ja(1).html" data-url="https://deepage.net/deep_learning/2016/11/30/resnet.html"></iframe>
+</span>
+
+<!-- fb -->
+<span class="facebook-social-share social-event-button" buttonid="4">
+	<span class="fb-like fb_iframe_widget" data-href="https://deepage.net/deep_learning/2016/11/30/resnet.html" data-layout="button" data-action="like" data-show-faces="false" data-share="true" fb-xfbml-state="rendered" fb-iframe-plugin-query="action=like&amp;app_id=637871436291439&amp;container_width=0&amp;href=https%3A%2F%2Fdeepage.net%2Fdeep_learning%2F2016%2F11%2F30%2Fresnet.html&amp;layout=button&amp;locale=ja_JP&amp;sdk=joey&amp;share=true&amp;show_faces=false"><span style="vertical-align: bottom; width: 120px; height: 20px;"><iframe name="f1fbf8af6442c5" width="1000px" height="1000px" title="fb:like Facebook Social Plugin" frameborder="0" allowtransparency="true" allowfullscreen="true" scrolling="no" allow="encrypted-media" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/like(1).html" style="border: none; visibility: visible; width: 120px; height: 20px;" class=""></iframe></span></span>
+</span>
+
+<!-- hatebu -->
+<span class="hatebu-social-share social-event-button" buttonid="5">
+<iframe class="hatena-bookmark-button-frame" title="このエントリーをはてなブックマークに追加" frameborder="0" scrolling="no" width="86" height="20" src="javascript:false" style="width: 86px; height: 20px;" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/saved_resource(1).html"></iframe><script type="text/javascript" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/bookmark_button.js.ダウンロード" charset="utf-8" async="async"></script>
+</span>
+
+<!-- Pocket -->
+<span class="pocket-social-share social-event-button" buttonid="6">
+<div class="pocket-btn"><iframe width="66" height="22" id="pocket-button-1" frameborder="0" allowtransparency="true" scrolling="NO" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/button(1).html"></iframe></div>
+</span>
+
+  </div>
+
+</article>
+</div>
+
+<article class="content-wrapper-post white">
+  <div class="content-contact bg-brain">
+  <div class="text-center to-contact post-promotion social-page">
+    <h4>DeepAgeではAIに関する厳選した内容を記事にしてお届けします。<br class="large-only">気に入って頂けたら応援お願いします！</h4>
+    <div class="content-page-social">
+	<span class="twitter-social-follow social-event-button" buttonid="1">
+	<iframe id="twitter-widget-0" scrolling="no" frameborder="0" allowtransparency="true" class="twitter-follow-button twitter-follow-button-rendered" style="position: static; visibility: visible; width: 119px; height: 28px;" title="Twitter Follow Button" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/follow_button.097c1f5038f9e8a0d62a39a892838d66.ja.html" data-screen-name="deepage_"></iframe>
+	</span>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+	<span class="facebook-social-share social-event-button" buttonid="2">
+	<div class="fb-like fb_iframe_widget" data-href="https://www.facebook.com/DeepAge-1597048233922796/" data-layout="button" data-action="like" data-size="large" data-show-faces="false" data-share="false" fb-xfbml-state="rendered" fb-iframe-plugin-query="action=like&amp;app_id=637871436291439&amp;container_width=704&amp;href=https%3A%2F%2Fwww.facebook.com%2FDeepAge-1597048233922796%2F&amp;layout=button&amp;locale=ja_JP&amp;sdk=joey&amp;share=false&amp;show_faces=false&amp;size=large"><span style="vertical-align: bottom; width: 88px; height: 28px;"><iframe name="f114a8d9f67dfb4" width="1000px" height="1000px" title="fb:like Facebook Social Plugin" frameborder="0" allowtransparency="true" allowfullscreen="true" scrolling="no" allow="encrypted-media" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/like(2).html" style="border: none; visibility: visible; width: 88px; height: 28px;" class=""></iframe></span></div>
+	</span>
+
+	<a class="feedly-btn" href="http://cloud.feedly.com/#subscription%2Ffeed%2Fhttps%3A%2F%2Fdeepage.net%2Ffeed.xml" target="blank"><img id="feedlyFollow" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/feedly-follow-rectangle-flat-medium_2x.png" alt="follow us in feedly" width="71" height="28"></a>
+
+</div>
+  </div>
+  </div>
+</article>
+
+<article id="promotion-contact" class="content-wrapper-post">
+    <div class="post-promotion">
+      <div>
+        <h3>人工知能(AI)技術の事業活用に<br class="large-only">興味はございませんか？</h3>
+        <p>DeepAgeでは人工知能開発に関するあらゆるご相談を随時受け付けております</p>
+        <ul class="promotion-list">
+          <li><a href="https://spot-corp.com/" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;link&#39;, &#39;click&#39;, &#39;company-from-post-banner&#39;, 1, {&#39;nonInteraction&#39; : 1});">会社概要はこちら</a></li>
+          <li><a href="https://deepage.net/document.html" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;link&#39;, &#39;click&#39;, &#39;document-from-post-banner&#39;, 1, {&#39;nonInteraction&#39; : 1});">事業概要・実績はこちら</a></li>
+          <li><a href="https://deepage.net/contact.html" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;link&#39;, &#39;click&#39;, &#39;contact-from-post-banner&#39;, 1, {&#39;nonInteraction&#39; : 1});">お問い合わせはこちら</a></li>
+        </ul>
+      </div>
+    </div>
+  
+</article>
+
+
+<article class="content-wrapper text-center content-recommend">
+
+  <!-- related post -->
+  <h2>おすすめの投稿</h2>
+  <div class="border"></div>
+  <ul class="post-list">
+    
+      <li>
+  <a href="https://deepage.net/deep_learning/2017/05/23/recurrent-neural-networks.html">
+    <div>
+      <div>
+        <img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/rnn-top.jpg">
+      </div>
+      <div class="post-item-text">
+        <h4 class="post-list-title">RNN：時系列データを扱うRecurrent Neural Networksとは</h4>
+        <div class="p-container">
+          <p class="post-list-foreword">リカレントニューラルネットワークは、時系列データを扱うことのできるニューラルネットワークの１つです。本記事では、RNNについて、応用事例や仕組み・実装方法まで徹底的に解説しました。</p>
+        </div>
+        <small class="post-date">2017-May-23</small>
+      </div>
+    </div>
+  </a>
+</li>
+    
+      <li>
+  <a href="https://deepage.net/deep_learning/2016/10/26/batch_normalization.html">
+    <div>
+      <div>
+        <img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/batch_norm_thumb.jpg">
+      </div>
+      <div class="post-item-text">
+        <h4 class="post-list-title">Batch Normalization：ニューラルネットワークの学習を加速させる汎用的で強力な手法</h4>
+        <div class="p-container">
+          <p class="post-list-foreword">ネットワーク内部の共変量シフトを抑えて、ニューラルネットワークの学習を加速させるBatch Normalizationについての解説と実装・効果検証しました。</p>
+        </div>
+        <small class="post-date">2016-Oct-26</small>
+      </div>
+    </div>
+  </a>
+</li>
+    
+      <li>
+  <a href="https://deepage.net/deep_learning/2016/09/26/recommend_deeplearning.html">
+    <div>
+      <div>
+        <img src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/google_play.jpg">
+      </div>
+      <div class="post-item-text">
+        <h4 class="post-list-title">レコメンドに浸透していくDeep Learning： 大手サービスの実用例から最新アルゴリズムを概観する</h4>
+        <div class="p-container">
+          <p class="post-list-foreword">各所で利用されるようになったディープラーニング。レコメンドでの応用事例はどうなっているのだろうか。Spotify、LINE、YouTube、Google Playの活用事例からアルゴリズムまで徹底解説しました。</p>
+        </div>
+        <small class="post-date">2016-Sep-26</small>
+      </div>
+    </div>
+  </a>
+</li>
+    
+  </ul>
+
+</article>
+
+
+    <footer id="footer-blog">
+
+	<div class="footer-blog-content content-wrapper">
+
+  	<div class="footer-col">
+  		<h4>記事一覧</h4>
+		<ul>
+	  		<li><a href="https://deepage.net/blog/" class="waves-effect">すべて</a></li>
+  		
+			
+			<li><a href="https://deepage.net/categories/bigdata">ビッグデータ</a></li>
+    	
+	  		
+			
+			<li><a href="https://deepage.net/categories/machine_learning">機械学習</a></li>
+    	
+	  		
+			
+			<li><a href="https://deepage.net/categories/ai_watson">人工知能</a></li>
+    	
+	  		
+			
+			<li><a href="https://deepage.net/categories/deep_learning">ディープラーニング</a></li>
+    	
+	  		
+			
+	    
+	  		
+			
+			<li><a href="https://deepage.net/categories/tensorflow">TensorFlow</a></li>
+    	
+	  		
+	  		<li><a href="https://deepage.net/features/numpy/">NumPy</a></li>
+	  		<li><a href="https://deepage.net/features/pandas/">Pandas</a></li>
+		</ul>
+	</div>
+
+	<div class="footer-col">
+		<h4>DeepAgeについて</h4>
+		<ul>
+			<li><a href="https://deepage.net/" class="waves-effect">トップページ</a></li>
+			<li><a href="https://deepage.net/recruit.html" class="waves-effect" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;link&#39;, &#39;click&#39;, &#39;recruit-from-footer&#39;, 1, {&#39;nonInteraction&#39; : 1});">採用情報</a></li>
+	  		<li><a href="https://spot-corp.com/" class="waves-effect" onclick="ga(&#39;send&#39;, &#39;event&#39;, &#39;link&#39;, &#39;click&#39;, &#39;company-from-footer&#39;, 1, {&#39;nonInteraction&#39; : 1});">運営会社</a></li>
+	  		<li><a href="https://deepage.net/contact.html" class="waves-effect">お問い合わせ</a></li>
+	  		<li><a href="https://deepage.net/privacy_policy.html" class="waves-effect">プライバシーポリシー</a></li>
+	  		<li><a href="https://deepage.net/privacy.html" class="waves-effect">個人情報の取り扱い</a></li>
+	  		<li><a href="https://deepage.net/feed.xml" class="waves-effect">RSS</a></li>
+		</ul>
+	</div>
+
+	<div class="fb-page fb_iframe_widget" data-href="https://www.facebook.com/1597048233922796" data-tabs="timeline" data-width="320" data-height="304" data-small-header="true" data-adapt-container-width="true" data-hide-cover="true" data-show-facepile="true" fb-xfbml-state="rendered" fb-iframe-plugin-query="adapt_container_width=true&amp;app_id=637871436291439&amp;container_width=445&amp;height=304&amp;hide_cover=true&amp;href=https%3A%2F%2Fwww.facebook.com%2F1597048233922796&amp;locale=ja_JP&amp;sdk=joey&amp;show_facepile=true&amp;small_header=true&amp;tabs=timeline&amp;width=320"><span style="vertical-align: bottom; width: 320px; height: 304px;"><iframe name="f1c10fd90c1064" width="320px" height="304px" title="fb:page Facebook Social Plugin" frameborder="0" allowtransparency="true" allowfullscreen="true" scrolling="no" allow="encrypted-media" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/page.html" style="border: none; visibility: visible; width: 320px; height: 304px;" class=""></iframe></span></div>
+
+	</div>
+
+	<div class="content-wrapper">
+    	<p><small>© <a href="https://deepage.net/company.html">Spot Inc.</a> 2016</small></p>
+  	</div>
+
+</footer>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-82841060-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/jquery-3.1.0.min.js.ダウンロード"></script>
+<script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/menu.min.js.ダウンロード"></script>
+<script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/alertify.min.js.ダウンロード"></script>
+<script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/form.min.js.ダウンロード"></script>
+<script src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/social-button-handle.min.js.ダウンロード"></script>
+<script>
+$(".to-contact-btn").click(function () {
+	var position = $("#contact").offset().top;
+	$("html,body").animate({ scrollTop: position }, 250);
+	return false;
+});
+</script>
+<script>
+$(".to-solution-btn").click(function () {
+	var position = $("#solution").offset().top;
+	$("html,body").animate({ scrollTop: position }, 250);
+	return false;
+});
+</script>
+<script>
+$(".to-value-btn").click(function () {
+	var position = $("#value").offset().top;
+	$("html,body").animate({ scrollTop: position }, 250);
+	return false;
+});
+</script>
+<!-- User Heat Tag -->
+<script type="text/javascript">
+(function(add, cla){window['UserHeatTag']=cla;window[cla]=window[cla]||function(){(window[cla].q=window[cla].q||[]).push(arguments)},window[cla].l=1*new Date();var ul=document.createElement('script');var tag = document.getElementsByTagName('script')[0];ul.async=1;ul.src=add;tag.parentNode.insertBefore(ul,tag);})('//uh.nakanohito.jp/uhj2/uh.js', '_uhtracker');_uhtracker({id:'uh7bUrpncf'});
+</script>
+<!-- End User Heat Tag -->
+<!-- Twitter script -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+<!-- Pocket script -->
+<script type="text/javascript">!function(d,i){if(!d.getElementById(i)){var j=d.createElement("script");j.id=i;j.src="https://widgets.getpocket.com/v1/j/btn.js?v=1";var w=d.getElementById(i);d.body.appendChild(j);}}(document,"pocket-btn-js");</script><script id="pocket-btn-js" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/btn.js.ダウンロード"></script>
+
+  
+
+<iframe scrolling="no" frameborder="0" allowtransparency="true" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/widget_iframe.097c1f5038f9e8a0d62a39a892838d66.html" title="Twitter settings iframe" style="display: none;"></iframe><iframe id="rufous-sandbox" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" style="position: absolute; visibility: hidden; display: none; width: 0px; height: 0px; padding: 0px; border: none;" title="Twitter analytics iframe" src="./Residual Network(ResNet)の理解とチューニングのベストプラクティス - DeepAge_files/saved_resource(2).html"></iframe></body></html>
